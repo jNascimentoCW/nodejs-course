@@ -1,6 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');
 
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
@@ -25,10 +27,21 @@ app.use('/api/v1/users', userRouter);
 
 //
 app.all('*', (req, res, next) => {
-    res.status(404).json({
-        status: 'faio',
-        message: `Can't find ${req.originalUrl} on this server!`,
-    });
+    // res.status(404).json({
+    //     status: 'faio',
+    //     message: `Can't find ${req.originalUrl} on this server!`,
+    // });
+
+    // const err = new Error(`Can't find ${req.originalUrl} on this server!`);
+    // err.status = 'fail';
+    // err.statusCode = 404;
+
+    //passing a parameter inside the next() will automatically be an error, and is going to skip all middlewares and throw an error
+    // next(err);
+
+    next(new AppError(`Can't find ${req.originalUrl} on this server!`), 404);
 });
+
+app.use(globalErrorHandler);
 
 module.exports = app;
